@@ -65,7 +65,7 @@ var overlayMaps = {
 var map = L.map("map", {
     center: [47.0479471, -121.2054656],
     zoom: 3,
-    layers: [lightMap]
+    layers: [darkMap]
 });
 
 /* Control Layer
