@@ -75,97 +75,99 @@ L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 // Function to return marker size for earthquakes
 function markerSize(magnitude) {
-    return magnitude * 5000;
+    return magnitude * 10000;
 }
 
-// Create and populate earthquakes layer group with leaflet circle layers
-d3.json("/earthquakes").then(data => {
-    console.log("called earthquake");
-    data.forEach((point) => {
-        dataLayers.EARTHQUAKES.addLayer(
-            L.circle([point.latitude, point.longitude], {
-                stroke: false,
-                fillOpacity: 0.5,
-                color: "red",
-                fillColor: "red",
-                radius: markerSize(point.magnitude)
-            })
-        )
-    })
-    console.log("Added earthquake layers");
+// Get year from epoch
+var format = d3.timeFormat("%Y")
 
-    // render EARTHQUAKES circles to map
-    dataLayers.EARTHQUAKES.addTo(map);
-    console.log("Added earthquakes layers to map");
-});
-
-// Create and populate floods layer group with leaflet circle layers
-d3.json("/floods").then(data => {
-    console.log("Called floods");
-    data.forEach(point => {
-        dataLayers.FLOODS.addLayer(
-            L.circle([point.latitude, point.longitude], {
-                stroke: false,
-                fillOpacity: 0.5,
-                color: "blue",
-                fillColor: "blue",
-                radius: 100
-            })
-        )
-    })
-    console.log("Added flood layers");
-
-    // render FLOODS to map
-    dataLayers.FLOODS.addTo(map);
-    console.log("Added floods layers to map");
-})
-
-// Create and populate tornado layer group with leaflet circle layers
-d3.json("/tornado").then(data => {
-    console.log("called tornado");
-    data.forEach(point => {
-        dataLayers.TORNADOES.addLayer(
-            L.circle([point.slat, point.slon], {
-                stroke: false,
-                fillOpacity: 0.5,
-                color: "yellow",
-                fillColor: "yellow",
-                radius: 100
-            })
-        )
-    })
-    console.log("added tornado layers");
-
-    // render TORNADOES to map
-    dataLayers.TORNADOES.addTo(map);
-    console.log("added tornado layers to map");
-})
-
-// Create and populate hurricanes layer group with leaflet circle layers
-d3.json("/hurricane").then(data => {
-    console.log("called hurricanes")
-    data.forEach(point => {
-        dataLayers.HURRICANES.addLayer(
-            L.circle([point.latitude, point.longitude], {
-                stroke: false,
-                fillOpacity: 0.5,
-                color: "green",
-                fillColor: "green",
-                radius: 100
-            })
-        )
-    })
-    console.log("added hurricanes layers");
-
-    // render HURRICANES to map
-    dataLayers.HURRICANES.addTo(map);
-    console.log("added hurricanes layers to map");
-})
-
+// Store all data - in the future we will create mongo queries for this for faster runtime
+var earthquake_data = d3.json("/earthquakes");
+var floods_data = d3.json("/floods");
+var hurricanes_data = d3.json("/hurricane");
+var tornado_data = d3.json("/tornado");
 
 // mapRender
-function mapRender(year) {
+mapRender = function( {label, value, map, exclamation}) {
+    // clear all layers
+    dataLayers.EARTHQUAKES.clearLayers();
+    dataLayers.FLOODS.clearLayers();
+    dataLayers.HURRICANES.clearLayers();
+    dataLayers.TORNADOES.clearLayers(); 
 
+    // Create Earthquake layers
+    earthquake_data.then(data => {
+        data.forEach(point => {
+            if(point.year == label){
+                dataLayers.EARTHQUAKES.addLayer(
+                    L.circle([point.latitude, point.longitude], {
+                        stroke: false,
+                        fillOpacity: 0.5,
+                        color: "red",
+                        fillColor: "red",
+                        radius: markerSize(point.magnitude)
+                    })
+                )
+            }
+        })
+    })
+
+    // Create Floods layers
+    floods_data.then(data => {
+        data.forEach(point => {
+            if(format(point.event_begin_time) == label){
+                dataLayers.FLOODS.addLayer(
+                    L.circle([point.latitude, point.longitude], {
+                        stroke: false,
+                        fillOpacity: 0.5,
+                        color: "blue",
+                        fillColor: "blue",
+                        radius: 5000
+                    })
+                )
+            }
+        })
+    })
+
+    // Create and populate tornado layer group with leaflet circle layers
+    tornado_data.then(data => {
+        data.forEach(point => {
+            if(format(point.date) == label){
+                dataLayers.TORNADOES.addLayer(
+                    L.circle([point.slat, point.slon], {
+                        stroke: false,
+                        fillOpacity: 0.5,
+                        color: "yellow",
+                        fillColor: "yellow",
+                        radius: 7000
+                    })
+                )
+            }
+        })
+    })
+
+    // Create and populate hurricanes layer group with leaflet circle layers
+    d3.json("/hurricane").then(data => {
+        data.forEach(point => {
+            if(point.season == label){
+                dataLayers.HURRICANES.addLayer(
+                    L.circle([point.latitude, point.longitude], {
+                        stroke: false,
+                        fillOpacity: 0.5,
+                        color: "green",
+                        fillColor: "green",
+                        radius: 100
+                    })
+                )
+            }
+        })
+    })
+    
+    // render all layers
+    dataLayers.EARTHQUAKES.addTo(map);
+    dataLayers.FLOODS.addTo(map);
+    dataLayers.HURRICANES.addTo(map);
+    dataLayers.TORNADOES.addTo(map);
 }
 
 // range of our timeline
@@ -178,6 +180,6 @@ for(var i = 1990; i <= 2019; i++){
 L.control.timelineSlider({
         timelineItems: timelineItems,
         extraChangeMapParams: { },
-        changeMap: console.log("slider test")
+        changeMap: mapRender
     })
     .addTo(map);
