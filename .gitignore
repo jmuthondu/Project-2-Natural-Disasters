@@ -65,3 +65,6 @@ $RECYCLE.BIN/
 ### Javascript ###
 # ignore config to prevent API key leaks
 config.js
+
+### Visual Studio Code ###
+.vscode
