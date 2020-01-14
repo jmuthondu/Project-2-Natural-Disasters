@@ -39,6 +39,53 @@ def natural_disaster(disaster_type):
     else:
         return jsonify({'ok': False, 'message': 'Bad request parameters!'})
 
+@app.route('/<disaster_type>/<myyear>') 
+def natural_disaster_years(disaster_type,myyear):
+    if disaster_type == 'floods':
+        data = dumps(mongo.db.flood_data.find({"year": int(myyear)}))
+        return  (data)
+    
+    elif disaster_type == 'earthquakes':
+        data = dumps(mongo.db.earthquake_data.find({"year": int(myyear)}))
+        return  (data)
+    
+    elif disaster_type == "hurricane":
+        data = dumps(mongo.db.hurricane_data.find({"year": int(myyear)}))
+        return  (data)
+    
+    elif disaster_type == 'tornado':
+        data = dumps(mongo.db.tornado_data.find({"year": int(myyear)}))
+        return  (data)
+    
+    else:
+        return jsonify({'ok': False, 'message': 'Bad request parameters!'})
+    
+    
+#@app.route('/q', methods = ['GET'])
+#def nd_year():
+#    disaster_type = request.args.get('dt')
+#    myyear =  request.args.get('yr')
+#    print(disaster_type)
+#    print(myyear)
+#    if disaster_type == 'floods':
+#        data = dumps(mongo.db.flood_data.find({ 'year': int(myyear) }))
+#        return  (data)
+#    
+#    elif disaster_type == 'earthquakes':
+#        data = dumps(mongo.db.earthquake_data.find({'year': { "$eq": myyear}}))
+#        return  (data)
+#    
+#    elif disaster_type2 == "hurricane":
+#        data = dumps(mongo.db.hurricane_data.find({ 'year': myyear }))
+#        return  (data)
+#    
+#    elif disaster_type2 == 'tornado':
+#        data = dumps(mongo.db.tornado_data.find({ 'year': myyear }))
+#        return  (data)
+#    
+#    else:
+#        return jsonify({'ok': False, 'message': 'Bad request parameters!'})
+#
 
     
 if __name__ == "__main__":
