@@ -70,11 +70,37 @@ var map = L.map("map", {
     layers: [darkMap]
 });
 
-/* Control Layer
- *  Description: Top right control box to filter natural disaster layers and type of map
+/* Control Layers
+ *  Description: Top right control box to filter natural disaster layers and type of map and bottom left legend
  */
 L.control.layers(baseMaps, overlayMaps).addTo(map);
 
+/* Legend
+ *  Description: Creating the legend for the map
+ */
+var legend = L.control({
+    position: "bottomleft"
+});
+
+legend.onAdd = function() {
+    var div = L.DomUtil.create("div", "legend");
+    return div
+}
+
+legend.addTo(map);
+
+d3.select(".legend").html(
+    `
+    <center>
+    <b>Legend</b><br>
+    <br>
+    <p class="earthquake">Earthquake</p>
+    <p class="flood">Flood</p>
+    <p class="tornado">Tornado</p>
+    <p class="hurricane">Hurricane</p>
+    </center>
+    `
+);
 
 /* Earth Tectonic Plates
  *  Description: Add a layer for tectonic plates
