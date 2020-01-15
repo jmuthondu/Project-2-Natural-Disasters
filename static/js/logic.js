@@ -46,7 +46,8 @@ var dataLayers = {
     EARTHQUAKES: new L.layerGroup(),
     FLOODS: new L.layerGroup(),
     HURRICANES: new L.layerGroup(),
-    TORNADOES: new L.layerGroup()
+    TORNADOES: new L.layerGroup(),
+    PLATES: new L.layerGroup()
 };
 
 /* overlays
@@ -56,8 +57,9 @@ var overlayMaps = {
     "Earthquakes": dataLayers.EARTHQUAKES,
     "Floods": dataLayers.FLOODS,
     "Hurricanes": dataLayers.HURRICANES,
-    "Tornadoes": dataLayers.TORNADOES
-}
+    "Tornadoes": dataLayers.TORNADOES,
+    "Tectonic Plates": dataLayers.PLATES
+};
 
 /* Map
  *  Description: initiate map centered on North America
@@ -73,73 +75,94 @@ var map = L.map("map", {
  */
 L.control.layers(baseMaps, overlayMaps).addTo(map);
 
-// Function to return marker size for earthquakes
+
+/* Earth Tectonic Plates
+ *  Description: Add a layer for tectonic plates
+ *
+ *  Credit:
+ *      - utilizes @fraxen's conversion of tectonic plates data into GeoJSON
+ *          -(https: //github.com/fraxen/tectonicplates)
+ */
+var platesUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
+
+d3.json(platesUrl).then(data => {
+    dataLayers.PLATES.addLayer(
+        L.geoJSON(data, {
+            style: {
+                weight: 1,
+                color: "orange"
+            }
+        })
+    )
+    dataLayers.PLATES.addTo(map)
+});
+
+/* markerSize
+ *  Description: function to return a magnified size of an earthquake's magnitude for use of leaflet marker size
+ */
 function markerSize(magnitude) {
     return magnitude * 10000;
-}
+};
 
-// Get year from epoch
-var format = d3.timeFormat("%Y")
-
-// Store all data - in the future we will create mongo queries for this for faster runtime
-var earthquake_data = d3.json("/earthquakes");
-var floods_data = d3.json("/floods");
-var hurricanes_data = d3.json("/hurricane");
-var tornado_data = d3.json("/tornado");
-
-// mapRender
-mapRender = function( {label, value, map, exclamation}) {
+/* updateLayers
+ *  Description: function to update each disaster's layer by calling endpoint for year the slider is selecting.
+ */
+function updateLayers(year){
     // clear all layers
     dataLayers.EARTHQUAKES.clearLayers();
     dataLayers.FLOODS.clearLayers();
     dataLayers.HURRICANES.clearLayers();
-    dataLayers.TORNADOES.clearLayers(); 
+    dataLayers.TORNADOES.clearLayers();
 
     // Create Earthquake layers
-    earthquake_data.then(data => {
+    d3.json(`/earthquake/${year}`).then(data => {
         data.forEach(point => {
-            if(point.year == label){
-                dataLayers.EARTHQUAKES.addLayer(
-                    L.circle([point.latitude, point.longitude], {
-                        stroke: false,
-                        fillOpacity: 0.5,
-                        color: "red",
-                        fillColor: "red",
-                        radius: markerSize(point.magnitude)
-                    })
-                )
-            }
+            dataLayers.EARTHQUAKES.addLayer(
+                L.circle([point.latitude, point.longitude], {
+                    stroke: false,
+                    fillOpacity: 0.5,
+                    color: "red",
+                    fillColor: "red",
+                    radius: markerSize(point.magnitude)
+                })
+            )
         })
     })
 
     // Create Floods layers
-    floods_data.then(data => {
+    d3.json(`/flood/${year}`).then(data => {
         data.forEach(point => {
-            if(format(point.event_begin_time) == label){
-                dataLayers.FLOODS.addLayer(
-                    L.circle([point.latitude, point.longitude], {
-                        stroke: false,
-                        fillOpacity: 0.5,
-                        color: "blue",
-                        fillColor: "blue",
-                        radius: 5000
-                    })
-                )
-            }
+            dataLayers.FLOODS.addLayer(
+                L.circle([point.latitude, point.longitude], {
+                    stroke: false,
+                    fillOpacity: 0.5,
+                    color: "blue",
+                    fillColor: "blue",
+                    radius: 5000
+                })
+            )
         })
     })
 
     // Create and populate tornado layer group with leaflet circle layers
-    tornado_data.then(data => {
+    d3.json(`/tornado/${year}`).then(data => {
         data.forEach(point => {
-            if(format(point.date) == label){
+            dataLayers.TORNADOES.addLayer(
+                L.circle([point.slat, point.slon], {
+                    stroke: false,
+                    fillOpacity: 0.5,
+                    color: "yellow",
+                    fillColor: "yellow",
+                    radius: 6000
+                })
+            )
+            if (point.elat != 0) {
                 dataLayers.TORNADOES.addLayer(
-                    L.circle([point.slat, point.slon], {
-                        stroke: false,
-                        fillOpacity: 0.5,
-                        color: "yellow",
-                        fillColor: "yellow",
-                        radius: 7000
+                    L.polyline([
+                        [point.slat, point.slon],
+                        [point.elat, point.elon]
+                    ], {
+                        color: "yellow"
                     })
                 )
             }
@@ -147,22 +170,20 @@ mapRender = function( {label, value, map, exclamation}) {
     })
 
     // Create and populate hurricanes layer group with leaflet circle layers
-    d3.json("/hurricane").then(data => {
+    d3.json(`/hurricane/${year}`).then(data => {
         data.forEach(point => {
-            if(point.season == label){
-                dataLayers.HURRICANES.addLayer(
-                    L.circle([point.latitude, point.longitude], {
-                        stroke: false,
-                        fillOpacity: 0.5,
-                        color: "green",
-                        fillColor: "green",
-                        radius: 100
-                    })
-                )
-            }
+            dataLayers.HURRICANES.addLayer(
+                L.circle([point.latitude, point.longitude], {
+                    stroke: false,
+                    fillOpacity: 0.5,
+                    color: "green",
+                    fillColor: "green",
+                    radius: 100
+                })
+            )
         })
     })
-    
+
     // render all layers
     dataLayers.EARTHQUAKES.addTo(map);
     dataLayers.FLOODS.addTo(map);
@@ -170,16 +191,22 @@ mapRender = function( {label, value, map, exclamation}) {
     dataLayers.TORNADOES.addTo(map);
 }
 
-// range of our timeline
+// mapRender
+mapRender = function( {label, value, map, exclamation}) {
+    updateLayers(label);
+}
+
+// Range of our timeline to use for the slider
 var timelineItems = [];
 for(var i = 1990; i <= 2019; i++){
     timelineItems.push(i);
 }
 
-//timelineSlider
+// Add time slider to map
 L.control.timelineSlider({
         timelineItems: timelineItems,
         extraChangeMapParams: { },
         changeMap: mapRender
     })
     .addTo(map);
+

@@ -20,11 +20,11 @@ def index():
 
 @app.route('/<disaster_type>') 
 def natural_disaster(disaster_type):
-    if disaster_type == 'floods':
+    if disaster_type == 'flood':
         data = dumps(mongo.db.flood_data.find())
         return  (data)
     
-    elif disaster_type == 'earthquakes':
+    elif disaster_type == 'earthquake':
         data = dumps(mongo.db.earthquake_data.find())
         return  (data)
     
@@ -41,11 +41,11 @@ def natural_disaster(disaster_type):
 
 @app.route('/<disaster_type>/<myyear>') 
 def natural_disaster_years(disaster_type,myyear):
-    if disaster_type == 'floods':
+    if disaster_type == 'flood':
         data = dumps(mongo.db.flood_data.find({"year": int(myyear)}))
         return  (data)
     
-    elif disaster_type == 'earthquakes':
+    elif disaster_type == 'earthquake':
         data = dumps(mongo.db.earthquake_data.find({"year": int(myyear)}))
         return  (data)
     
