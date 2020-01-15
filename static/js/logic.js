@@ -104,6 +104,10 @@ function markerSize(magnitude) {
     return magnitude * 10000;
 };
 
+// d3 converters for epoch time
+var dateFormat = d3.timeFormat("%x")
+var fullDate = d3.timeFormat("%x %X")
+
 /* updateLayers
  *  Description: function to update each disaster's layer by calling endpoint for year the slider is selecting.
  */
@@ -124,7 +128,15 @@ function updateLayers(year){
                     color: "red",
                     fillColor: "red",
                     radius: markerSize(point.magnitude)
-                })
+                }).bindPopup(
+                    `<center>
+                    <b>EARTHQUAKE</b><br>
+                    Magnitude: ${point.magnitude}<br>
+                    Date/Time: ${point.month}/${point.day}/${year} ${point.hour}:${point.minute}<br>
+                    Coordinates: (${point.latitude}, ${point.longitude})<br>
+                    Location: ${point.location}<br>
+                    </center>`
+                )
             )
         })
     })
@@ -139,7 +151,19 @@ function updateLayers(year){
                     color: "blue",
                     fillColor: "blue",
                     radius: 5000
-                })
+                }).bindPopup(
+                    `<center>
+                    <b>FLOOD</b><br>
+                    Date: ${dateFormat(point.date)}<br>
+                    Start: ${fullDate(point.event_begin_time)}<br>
+                    End: ${fullDate(point.event_end_time)}<br>
+                    Coordinates: (${point.latitude}, ${point.longitude})<br>
+                    <br>
+                    <b><i>Damage Report</i></b><br>
+                    Damaged Property: ${point.damage_property}<br>
+                    Damaged Crops: ${point.damage_crops}
+                    </center>`
+                )
             )
         })
     })
@@ -154,7 +178,21 @@ function updateLayers(year){
                     color: "yellow",
                     fillColor: "yellow",
                     radius: 6000
-                })
+                }).bindPopup(
+                    `<center>
+                    <b>TORNADO</b><br>
+                    F-scale: ${point.fscale}<br>
+                    Date: ${dateFormat(point.date)}<br>
+                    Start: (${point.slat}, ${point.slon})<br>
+                    End: (${point.elat}, ${point.elon})<br>
+                    Width: ${point.width}<br>
+                    <br>
+                    <b><i>Damage Report</i></b><br>
+                    Injuries: ${point.injured}<br>
+                    Fatalities: ${point.fatalities}<br>
+                    Property Loss: ${point.property_loss}<br>
+                    </center>`
+                )
             )
             if (point.elat != 0) {
                 dataLayers.TORNADOES.addLayer(
@@ -178,8 +216,18 @@ function updateLayers(year){
                     fillOpacity: 0.5,
                     color: "green",
                     fillColor: "green",
-                    radius: 100
-                })
+                    radius: 10000
+                }).bindPopup(
+                    `<center>
+                    <b>HURRICANE</b><br>
+                    Name: ${point.name}<br>
+                    Date: ${d3.isoParse(point.iso_time)}<br>
+                    Time: ${point.time} ${point.time_zone}<br>
+                    Coordinates: (${point.latitude}, ${point.longitude})<br>
+                    Wind Speed: ${point.usa_wind} kts<br>
+                    Pressure: ${point.usa_pressure}<br>
+                    </center>`
+                )
             )
         })
     })
