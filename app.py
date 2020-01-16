@@ -43,7 +43,10 @@ def natural_disaster(disaster_type):
 def natural_disaster_years(disaster_type,myyear):
     if disaster_type == 'flood':
         data = dumps(mongo.db.flood_data.find({"year": int(myyear)}))
+        # count = dumps(mongo.db.flood_data.find({"year": int(myyear)}).count())
         return  (data)
+        # return (count)
+
     
     elif disaster_type == 'earthquake':
         data = dumps(mongo.db.earthquake_data.find({"year": int(myyear)}))
@@ -80,7 +83,29 @@ def natural_disaster_time_frame(disaster_type,s_year,e_year):
     
     else:
         return jsonify({'ok': False, 'message': 'Bad request parameters!'})
+
+
+@app.route('/<disaster_type>/<c_year>/count')
+def natural_disaster_years_count(disaster_type,c_year):
+    if disaster_type == 'flood':
+        data = dumps(mongo.db.flood_data.find({"year": int(c_year)}).count())
+        return  (data)
     
+    elif disaster_type == 'earthquake':
+        data = dumps(mongo.db.earthquake_data.find({"year": int(c_year)}).count())
+    
+        return  (data)
+    
+    elif disaster_type == "hurricane":
+        data = dumps(mongo.db.hurricane_data.find({"year": int(c_year)}).count())
+        return  (data)
+    
+    elif disaster_type == 'tornado':
+        data = dumps(mongo.db.tornado_data.find({"year": int(c_year)}).count())
+        return  (data)
+    
+    else:
+        return jsonify({'ok': False, 'message': 'Bad request parameters!'})    
     
 if __name__ == "__main__":
     app.run(debug=True)
