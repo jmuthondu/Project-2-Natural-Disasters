@@ -268,6 +268,7 @@ function updateLayers(year){
 // mapRender
 mapRender = function( {label, value, map, exclamation}) {
     updateLayers(label);
+    updateCharts(label);
 }
 
 // Range of our timeline to use for the slider
@@ -284,3 +285,43 @@ L.control.timelineSlider({
     })
     .addTo(map);
 
+
+function updateCharts(year){
+    d3.json(`/${year}/counts`).then(function(data){
+        //Donut of all the Disasters
+        let ctx = document.getElementById('doughnut').getContext('2d');
+        let myDoughnutChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [data["eCount"], data["fCount"], data["tCount"], data["hCount"]]
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: [
+                    'Earthquakes',
+                    'Floods',
+                    'Tornadoes',
+                    'Hurricanes'
+                ]
+            },
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Chart.js Doughnut Chart'
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+
+    })
+
+    
+}
