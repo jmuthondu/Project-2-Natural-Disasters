@@ -282,11 +282,11 @@ L.control.timelineSlider({
         timelineItems: timelineItems,
         extraChangeMapParams: { },
         changeMap: mapRender
-    })
-    .addTo(map);
+    }).addTo(map);
 
-
+// Updates charts data when slider on the map is changed
 function updateCharts(year){
+    // Update doughnut chart
     d3.json(`/${year}/counts`).then(function(data){
         //Donut of all the Disasters
         let ctx = document.getElementById('doughnut').getContext('2d');
@@ -323,5 +323,41 @@ function updateCharts(year){
 
     })
 
-    
+    // Update monthly line chart
+    d3.json(`/${year}/counts/month`).then(function(data){
+        //Line chart of all disasters
+        let myLineChart = new Chart(document.getElementById("line-chart"), {
+            type: 'line',
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                datasets: [{
+                    data: data.floood,
+                    label: "Floods",
+                    borderColor: "#3e95cd",
+                    fill: false
+                }, {
+                    data: data.tornado,
+                    label: "Tornadoes",
+                    borderColor: "#8e5ea2",
+                    fill: false
+                }, {
+                    data: data.hurricane,
+                    label: "Hurricanes",
+                    borderColor: "#3cba9f",
+                    fill: false
+                }, {
+                    data: data.earthquake,
+                    label: "Earthquakes",
+                    borderColor: "#e8c3b9",
+                    fill: false
+                }, ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Number of disasters in North America in a year'
+                }
+            }
+        })
+    });
 }
