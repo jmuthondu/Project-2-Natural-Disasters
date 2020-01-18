@@ -93,7 +93,7 @@ d3.select(".legend").html(
     `
     <center>
     <b>Legend</b><br>
-    <br>
+    <hr>
     <p class="earthquake">Earthquake</p>
     <p class="flood">Flood</p>
     <p class="tornado">Tornado</p>

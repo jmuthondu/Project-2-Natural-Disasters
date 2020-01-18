@@ -40,7 +40,7 @@
     </script>
 </head>
 <body>
-    <h1>Natural Disasters Visualization</h1>
+    <h1 class="display-4">Natural Disasters Visualizer</h1>
 
     <!-- map div -->
     <div id="map"></div>
@@ -55,7 +55,7 @@
                 <canvas id="line-chart"></canvas>
             </div>
         </div>
-        <br>
+        <hr>
         <div class="row">
             <div class="col-lg" id="canvas-holder">
                 <canvas id="tornado-dmg"></canvas>
@@ -65,7 +65,7 @@
                 <canvas id="flood-dmg"></canvas>
             </div>
         </div>
-        <br>
+        <hr>
         <div class="row">
             <div class="col-lg" id="canvas-holder">
                 <canvas id="earthquake-dmg"></canvas>
@@ -76,6 +76,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="page-footer pt-4">
+        <div class="container-fluid">
+            <center>
+                <h2 class="text-muted">
+                    Data sourced from NOAA 
+                    <img src="https://www.noaa.gov/sites/all/themes/custom/noaa/images/noaa_logo_circle_bw_72x72.svg"
+                        alt="noaa-logo">
+                </h2>
+            </center>
+        </div>
+    </footer>
+    <!-- Footer -->
 
     <!-- API Key -->
     <script type="text/javascript" src="static/js/config.js"></script>

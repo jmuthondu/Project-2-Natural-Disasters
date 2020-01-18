@@ -6,9 +6,14 @@ H2 {
     text-align: center
 }
 
+H3 {
+    text-align: center
+}
+
 body {
     padding: 0;
     margin: 0;
+    margin-bottom: 60px;
 }
 
 #map,
