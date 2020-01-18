@@ -93,7 +93,7 @@ d3.select(".legend").html(
     `
     <center>
     <b>Legend</b><br>
-    <br>
+    <hr>
     <p class="earthquake">Earthquake</p>
     <p class="flood">Flood</p>
     <p class="tornado">Tornado</p>
@@ -136,6 +136,7 @@ var fullDate = d3.timeFormat("%x %X")
 
 /* updateLayers
  *  Description: function to update each disaster's layer by calling endpoint for year the slider is selecting.
+ *                  - Now also updates charts that only show data
  */
 function updateLayers(year){
     // clear all layers
@@ -146,7 +147,13 @@ function updateLayers(year){
 
     // Create Earthquake layers
     d3.json(`/earthquake/${year}`).then(data => {
+        let damageReport = {
+            damage_house: 0,
+            destroyed_house: 0
+        }
+
         data.forEach(point => {
+            // Add earthquake layers
             dataLayers.EARTHQUAKES.addLayer(
                 L.circle([point.latitude, point.longitude], {
                     stroke: false,
@@ -164,12 +171,64 @@ function updateLayers(year){
                     </center>`
                 )
             )
+
+            // Calculate damage report
+            damageReport.damage_house += point["number of houses damaged"]
+            damageReport.destroyed_house += point["number of houses destroyed"]
+        })
+
+        let earthquakeDmgChart = new Chart(document.getElementById("earthquake-dmg"), {
+            type: 'horizontalBar',
+            data: {
+                datasets: [{
+                    data: [damageReport.damage_house, damageReport.destroyed_house],
+                    backgroundColor: ["#ff0000", "#008cff"]
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: [
+                    'Damaged Houses',
+                    'Destroyed Houses',
+                ]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: `Earthquake Damage Report in ${year}`
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Count"
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Damage Type"
+                        }
+                    }]
+                }
+            }
         })
     })
 
     // Create Floods layers
     d3.json(`/flood/${year}`).then(data => {
+        let damageReport = {
+            damage_property: 0,
+            damage_crops: 0
+        }
+
         data.forEach(point => {
+            // Add marker to map
             dataLayers.FLOODS.addLayer(
                 L.circle([point.latitude, point.longitude], {
                     stroke: false,
@@ -191,12 +250,66 @@ function updateLayers(year){
                     </center>`
                 )
             )
+
+            // Calculate damage
+            damageReport.damage_property += point.damage_property;
+            damageReport.damage_crops += point.damage_crops;
+        })
+
+        // Update damage report chart
+        let floodDmgChart = new Chart(document.getElementById("flood-dmg"), {
+            type: 'horizontalBar',
+            data: {
+                datasets: [{
+                    data: [damageReport.damage_property, damageReport.damage_crops],
+                    backgroundColor: ["#ff0000", "#008cff"]
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: [
+                    'Damaged Property ($)',
+                    'Damaged Crops',
+                ]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: `Flood Damage Report in ${year}`
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Count"
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Damage Type"
+                        }
+                    }]
+                }
+            }
         })
     })
 
     // Create and populate tornado layer group with leaflet circle layers
     d3.json(`/tornado/${year}`).then(data => {
+        let damageReport = {
+            injured: 0,
+            fatalities: 0,
+            property_loss: 0
+        }
+
         data.forEach(point => {
+            // Add marker to map
             dataLayers.TORNADOES.addLayer(
                 L.circle([point.slat, point.slon], {
                     stroke: false,
@@ -219,7 +332,9 @@ function updateLayers(year){
                     Property Loss: ${point.property_loss}<br>
                     </center>`
                 )
-            )
+            );
+
+            // Draws line from starting point to end point
             if (point.elat != 0) {
                 dataLayers.TORNADOES.addLayer(
                     L.polyline([
@@ -229,6 +344,55 @@ function updateLayers(year){
                         color: "yellow"
                     })
                 )
+            }
+
+            // Calculate damage
+            damageReport.injured += point.injured;
+            damageReport.fatalities += point.fatalities;
+            damageReport.property_loss += point.property_loss;
+        })
+
+        // Update damage report chart
+        let tornadoDmgChart = new Chart(document.getElementById("tornado-dmg"), {
+            type: 'horizontalBar',
+            data: {
+                datasets: [{
+                    data: [damageReport.injured, damageReport.fatalities, damageReport.property_loss],
+                    backgroundColor: ["#ff0000", "#008cff", "#fbff00"]
+                }],
+
+                // These labels appear in the legend and in the tooltips when hovering different arcs
+                labels: [
+                    'Injuries',
+                    'Fatalities',
+                    'Property Loss ($)'
+                ]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: `Tornado Damage Report in ${year}`
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Count"
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Damage Type"
+                        }
+                    }]
+                }
             }
         })
     })
@@ -282,11 +446,11 @@ L.control.timelineSlider({
         timelineItems: timelineItems,
         extraChangeMapParams: { },
         changeMap: mapRender
-    })
-    .addTo(map);
+    }).addTo(map);
 
-
+// Updates charts data when slider on the map is changed
 function updateCharts(year){
+    // Update doughnut chart
     d3.json(`/${year}/counts`).then(function(data){
         //Donut of all the Disasters
         let ctx = document.getElementById('doughnut').getContext('2d');
@@ -294,7 +458,8 @@ function updateCharts(year){
             type: 'doughnut',
             data: {
                 datasets: [{
-                    data: [data["eCount"], data["fCount"], data["tCount"], data["hCount"]]
+                    data: [data.eCount, data.fCount, data.tCount, data.hCount],
+                    backgroundColor: ["#ff0000", "#008cff", "#fbff00", "#00c479"]
                 }],
 
                 // These labels appear in the legend and in the tooltips when hovering different arcs
@@ -312,7 +477,7 @@ function updateCharts(year){
                 },
                 title: {
                     display: true,
-                    text: 'Chart.js Doughnut Chart'
+                    text: `Doughnut Chart of # of Disasters Reported in North America in ${year}`
                 },
                 animation: {
                     animateScale: true,
@@ -323,5 +488,55 @@ function updateCharts(year){
 
     })
 
-    
+    // Update monthly line chart
+    d3.json(`/${year}/counts/month`).then(function(data){
+        //Line chart of all disasters
+        let myLineChart = new Chart(document.getElementById("line-chart"), {
+            type: 'line',
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                datasets: [{
+                    data: data.flood,
+                    label: "Floods",
+                    borderColor: "#008cff",
+                    fill: false
+                }, {
+                    data: data.tornado,
+                    label: "Tornadoes",
+                    borderColor: "#fbff00",
+                    fill: false
+                }, {
+                    data: data.hurricane,
+                    label: "Hurricanes",
+                    borderColor: "#00c479",
+                    fill: false
+                }, {
+                    data: data.earthquake,
+                    label: "Earthquakes",
+                    borderColor: "#ff0000",
+                    fill: false
+                }, ]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: `# of Disasters Reported in North America in ${year} by Month`
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "Month"
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: "# of Natural Disasters Reported"
+                        }
+                    }]
+                }
+            }
+        })
+    });
 }
