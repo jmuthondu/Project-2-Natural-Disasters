@@ -333,29 +333,29 @@ function updateCharts(year){
                 datasets: [{
                     data: data.floood,
                     label: "Floods",
-                    borderColor: "#3e95cd",
+                    borderColor: "#008cff",
                     fill: false
                 }, {
                     data: data.tornado,
                     label: "Tornadoes",
-                    borderColor: "#8e5ea2",
+                    borderColor: "#fbff00",
                     fill: false
                 }, {
                     data: data.hurricane,
                     label: "Hurricanes",
-                    borderColor: "#3cba9f",
+                    borderColor: "#00c479",
                     fill: false
                 }, {
                     data: data.earthquake,
                     label: "Earthquakes",
-                    borderColor: "#e8c3b9",
+                    borderColor: "#ff0000",
                     fill: false
                 }, ]
             },
             options: {
                 title: {
                     display: true,
-                    text: 'Number of disasters in North America in a year'
+                    text: `# of Disasters Reported in North America in ${year}`
                 }
             }
         })
