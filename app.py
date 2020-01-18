@@ -15,8 +15,6 @@ mongo = PyMongo(app, uri = "mongodb://localhost:27017/weather_data")
 def index():
     
     return render_template("index.html")
-    
-    
 
 @app.route('/<disaster_type>') 
 def natural_disaster(disaster_type):
@@ -84,7 +82,6 @@ def natural_disaster_time_frame(disaster_type,s_year,e_year):
     else:
         return jsonify({'ok': False, 'message': 'Bad request parameters!'})
 
-
 @app.route('/<year>/counts')
 def natural_disaster_years_count(year):
     counts = {
@@ -94,7 +91,30 @@ def natural_disaster_years_count(year):
         "hCount": dumps(mongo.db.hurricane_data.find({"year": int(year)}).count())
     }
     
-    return jsonify(counts)    
-    
+    return jsonify(counts)
+
+# Function to return dictionary of counts of entries by month
+def count_months(disaster,year):
+    months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    temp_list = []
+
+    for month in months:
+        temp_list.append(dumps(mongo.db[f'{disaster}_data'].find({"year": int(year), "month": month}).count()))
+
+    return temp_list
+
+
+@app.route('/<year>/counts/month')
+def natural_disaster_months_count(year):
+    counts = {
+        "earthquake": count_months("earthquake", year),
+        "flood": count_months("flood", year),
+        "tornado": count_months("tornado", year),
+        "hurricane": count_months("hurricane", year),
+    }
+
+    return jsonify(counts)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
