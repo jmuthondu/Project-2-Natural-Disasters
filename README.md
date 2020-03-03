@@ -1,5 +1,5 @@
 # Natural Disasters
-We did an analysis on the impact
+We did an analysis on the impact of 
 
 ## Dataset Source
 We pulled the data from NOAA(National Oceanic and Atmospheric Administration)
