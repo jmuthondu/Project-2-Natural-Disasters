@@ -1,5 +1,5 @@
 # Natural Disasters
-We did
+We did an 
 
 ## Dataset Source
 We pulled the data from NOAA(National Oceanic and Atmospheric Administration)
